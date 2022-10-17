@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "django-sdtm-export"
+version = "0.1.0"
+description = "This package takes Django models and exports them with SDTM formatting."
+authors = ["Zaid Al-Jubouri <zaid@lindushealth.com>"]
+license = "MIT"
+packages = [
+    { include = "sdtm_export" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <4"
+Django = ">=3.2, <4.2"
+pandas = "~1.5.0"
+numpy = "~1.23.4"
+
+[tool.poetry.dev-dependencies]
+django-dynamic-fixture = "~3.1.2"
+pytest = "~7"
+pytest-django = "~4.5.2"
+black = "~22.10.0"
+flake8 = "~5.0.4"
+isort = "~5.10.1"
+django-enumfields = "^2.1.1"
+pytest-cov = "^4.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+color = true
+extend-exclude = "/migrations/"
+
+[tool.isort]
+py_version=38
+multi_line_output = 3
+line_length = 88
+include_trailing_comma = true
+ensure_newline_before_comments = true
+combine_as_imports = true
+default_section = "THIRDPARTY"
+known_first_party = "sdtm_export, test_app, test_project"
+known_django = "django"
+sections = "FUTURE,STDLIB,DJANGO,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+skip_glob = ["*/migrations/*"]
+from_first = true
+reverse_relative = true
+no_lines_before = "LOCALFOLDER"
