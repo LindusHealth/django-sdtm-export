@@ -452,6 +452,7 @@ class SDTMExporterBase:
 
         data = self.export(subtree_node)
 
+
         # ensure the columns are in the proper order
         data = data[[v.oid for v in self.variables]]
 

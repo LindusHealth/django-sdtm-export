@@ -1,24 +1,55 @@
+
 import csv
-
-from ddf import G
 import pytest
+from ddf import G
+from test_project.test_app.models import Input, InputType, Participant, Question, Study, Unit
+from test_project.test_app.tests.example import DOMAIN, EXPORT_DISCLAIMER_TEXT, STUDY_NAME, SUBJECT_ID, ExampleSDTMExporter, Variables
 
-from test_project.test_app.models import (
-    Input,
-    InputType,
-    Participant,
-    Question,
-    Study,
-    Unit,
-)
-from .example import (
-    EXPECTED_CSV_CONTENT,
-    EXPECTED_DATA,
-    EXPECTED_SINGLE_ROW_CSV,
-    STUDY_NAME,
-    SUBJECT_ID,
-    ExampleSDTMExporter,
-)
+
+EXPECTED_CSV_CONTENT = [
+    [EXPORT_DISCLAIMER_TEXT],
+    [
+        Variables.STUDY_NAME.oid,
+        Variables.DOMAIN.oid,
+        Variables.SUBJECT_ID.oid,
+        Variables.VALUE.oid,
+        Variables.UNIT.oid,
+        Variables.TEST_CONSTANT.oid,
+    ],
+    [STUDY_NAME, DOMAIN, SUBJECT_ID, "Yes", "", "0"],
+    [STUDY_NAME, DOMAIN, SUBJECT_ID, "10", "kg", "0"],
+]
+
+EXPECTED_SINGLE_ROW_CSV = [
+    [EXPORT_DISCLAIMER_TEXT],
+    ["Name", "Value", "Description"],
+    [
+        Variables.STUDY_NAME.oid,
+        STUDY_NAME,
+        Variables.STUDY_NAME.name,
+    ],
+    [
+        Variables.DOMAIN.oid,
+        DOMAIN,
+        Variables.DOMAIN.name,
+    ],
+    [
+        Variables.SUBJECT_ID.oid,
+        SUBJECT_ID,
+        Variables.SUBJECT_ID.name,
+    ],
+    [
+        Variables.VALUE.oid,
+        "Yes",
+        Variables.VALUE.name,
+    ],
+    [
+        Variables.UNIT.oid,
+        "",
+        Variables.UNIT.name,
+    ],
+    [Variables.TEST_CONSTANT.oid, "0", Variables.TEST_CONSTANT.name],
+]
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +59,7 @@ def csv_file(tmp_path_factory):
 
 @pytest.mark.django_db
 class TestSDTMCSVExporter:
-    def test_visitor(self, csv_file):
+    def test_export_to_csv(self, csv_file):
         study = G(Study, name=STUDY_NAME)
         participant = G(Participant, study=study, subject_id=SUBJECT_ID)
         input1 = G(
@@ -42,17 +73,12 @@ class TestSDTMCSVExporter:
             Input,
             participant=participant,
             type=InputType.NUMBER_WITH_UNIT,
-            value="10.0",
+            value="10",
             unit=G(Unit, unit="kg"),
             question=G(Question),
         )
 
         exporter = ExampleSDTMExporter(study)
-        exported_data = exporter.export().to_dict("list")
-
-        assert set(exported_data.keys()) == set(EXPECTED_DATA.keys())
-        for k, values in exported_data.items():
-            assert sorted(values, key=str) == sorted(EXPECTED_DATA[k], key=str)
 
         with open(csv_file, "w") as f:
             exporter.export_to_csv(f)
@@ -60,6 +86,8 @@ class TestSDTMCSVExporter:
         with open(csv_file) as f:
             reader = list(csv.reader(f))
             assert len(reader) == len(EXPECTED_CSV_CONTENT)
+                ",".join(r) for r in EXPECTED_CSV_CONTENT
+            ))
             assert set(",".join(r) for r in reader) == set(
                 ",".join(r) for r in EXPECTED_CSV_CONTENT
             )
@@ -77,24 +105,5 @@ class TestSDTMCSVExporter:
 
         with open(csv_file) as f:
             reader = csv.reader(f)
+
             assert list(reader) == EXPECTED_SINGLE_ROW_CSV
-
-        # Using subtree export on the root should raise an error
-        with pytest.raises(ValueError):
-            exporter.export(study)
-
-        study2 = G(Study, name="Second Study")
-
-        participant2 = G(Participant, study=study2, subject_id="test2")
-        input2 = G(
-            Input,
-            participant=participant2,
-            type=InputType.STRING,
-            value="Yes",
-            question=G(Question),
-        )
-
-        # Trying to use an exporter for one study on another study's data
-        # should raise an error
-        with pytest.raises(ValueError):
-            exporter.export(input2)
