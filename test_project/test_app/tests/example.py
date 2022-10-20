@@ -1,6 +1,7 @@
 from enum import Enum
 
 from sdtm_export.sdtm_exporter import SDTMExporterBase
+from sdtm_export.variables import BaseVariables
 from test_project.test_app.models import Input, Participant, Study
 
 STUDY_NAME = "Test Name"
@@ -8,14 +9,13 @@ DOMAIN = "EXAMPLE"
 SUBJECT_ID = "test-subject"
 EXPORT_DISCLAIMER_TEXT = "Test disclaimer"
 
-
-class Variables(Enum):
-    STUDY_NAME = "STUDY_NAME"
-    DOMAIN = "DOMAIN"
-    SUBJECT_ID = "SUBJECT_ID"
-    VALUE = "VALUE"
-    UNIT = "UNIT"
-    TEST_CONSTANT = "CONST"
+class Variables(BaseVariables):
+    STUDY_NAME = ("STUDY_NAME", "Study Name", "Char", "200")
+    DOMAIN = ("DOMAIN", "Domain", "Char", "200")
+    SUBJECT_ID = ("SUBJECT_ID", "Subject Id", "Char", "24")
+    VALUE = ("VALUE", "Value", "Char", "200")
+    UNIT = ("UNIT", "Unit", "Char", "200")
+    TEST_CONSTANT = ("CONST", "Test Constant", "Char", "200")
 
 
 class ExampleSDTMExporter(SDTMExporterBase):

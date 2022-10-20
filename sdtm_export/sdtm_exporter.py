@@ -80,6 +80,12 @@ class SDTMExporterBase:
     `label`
         A label string, e.g. "Adverse Events" (required for Dataset-JSON only)
 
+    `sort_by`:
+        member of `variables` or a list of members of `variables` to sort the output data
+        by.
+
+    `sort_order`:
+        'asc' or 'desc' (or a list of 'asc' or 'desc'). Default: 'asc'
 
     Exporting:
     -----------
@@ -177,6 +183,10 @@ class SDTMExporterBase:
     domain_variable = None
     domain = None
     label = None
+
+    sort_by = None
+    sort_order = None
+    annotators = None
 
     def get_study_id(self):
         study = self.get_ancestor("Study")
@@ -278,8 +288,7 @@ class SDTMExporterBase:
             data = self._export(self.root)
 
         data = DataFrame(data)
-        self._post_process(data)
-        return data
+        return self._post_process(data)
 
     def _export(self, node, extra_data=None) -> Dict[str, List[str]]:
         """
@@ -376,6 +385,19 @@ class SDTMExporterBase:
         self._add_domain(data)
         self._add_constants(data)
         self._add_missing_columns(data)
+        self._sort(data)
+        self._annotate(data)
+        # Order columns properly
+        return data[list([v.oid for v in self.variables])]
+
+    def _sort(self, data: DataFrame):
+        if self.sort_by:
+            order = (
+                self.sort_order != "desc"
+                if not isinstance(self.sort_order, list)
+                else [o != "desc" for o in self.sort_order]
+            )
+            data.sort_values(self.sort_by, ascending=order, inplace=True)
 
     def _add_domain(self, data: DataFrame):
         data[self.domain_variable] = self.domain
@@ -386,8 +408,19 @@ class SDTMExporterBase:
 
     def _add_missing_columns(self, data: DataFrame):
         for variable in self.variables:
-            if variable not in data:
-                data[variable] = ""
+            if variable.oid not in data:
+                data[variable.oid] = ""
+
+    def _annotate(self, data: DataFrame):
+        if self.annotators:
+            if not self.sort_by:
+                raise InvalidConfigurationError("sort by must be set")
+
+            if isinstance(self.annotators, list):
+                for annotator in self.annotators:
+                    annotator.annotate(self, data)
+            else:
+                self.annotators.annotate(self, data)
 
     def export_to_csv(self, file, subtree_node=None, options={}):
         transpose = options.get("transpose", False)
@@ -405,11 +438,11 @@ class SDTMExporterBase:
     def _export_to_csv(self, file, subtree_node=None):
         self._write_csv_disclaimer(file)
 
-        headers = [h.value for h in self.variables]
+        headers = [h.oid for h in self.variables]
 
-        self.export(subtree_node).to_csv(
-            file, header=headers, columns=self.variables, index=False
-        )
+        data = self.export(subtree_node)
+
+        data.to_csv(file, header=headers, index=False)
 
     def export_to_json(self, subtree_node=None):
         if self.label is None:
@@ -419,16 +452,15 @@ class SDTMExporterBase:
 
         data = self.export(subtree_node)
 
-        variables = list(self.variables)
         # ensure the columns are in the proper order
-        data = data[variables]
+        data = data[[v.oid for v in self.variables]]
 
         return {
             "clinicalData": {
                 "studyOID": self.get_study_id(),
-                "metaDataVersionOID": self.get_study_id(),  # TODO what is this?
+                "metaDataVersionOID": self.get_study_id(),
                 "itemGroupData": {
-                    "IT."
+                    "IG."
                     + self.domain: {
                         "itemData": data.values.tolist(),
                         "name": self.domain,
@@ -436,12 +468,13 @@ class SDTMExporterBase:
                         "records": len(data.index),
                         "items": [
                             {
-                                "OID": "IT." + str(v.value),
-                                "name": v.value,
-                                "label": v.value,
-                                "type": "string",  # TODO populate this
+                                "OID": "IT." + str(v.oid),
+                                "name": v._name_,
+                                "label": v.cdisc_label,
+                                "type": v.type,
+                                "length": v.length,
                             }
-                            for v in variables
+                            for v in self.variables
                         ],
                     },
                 },
@@ -470,4 +503,4 @@ class SDTMExporterBase:
         # TODO: Support better variable descriptions than just
         # the name
         writer.writerow(["Name", "Value", "Description"])
-        writer.writerows([(h.value, data[h][0], h.name) for h in self.variables])
+        writer.writerows([(h.oid, data[h.oid][0], h.name) for h in self.variables])
