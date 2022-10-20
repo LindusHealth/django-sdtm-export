@@ -2,7 +2,6 @@ from ddf import G
 import pytest
 
 from sdtm_export.annotators import SequenceAnnotator
-from sdtm_export.sdtm_exporter import SDTMExporterBase
 from sdtm_export.variables import BaseVariables
 from test_project.test_app.models import (
     Input,
@@ -12,7 +11,12 @@ from test_project.test_app.models import (
     Study,
     Unit,
 )
-from test_project.test_app.tests.example import DOMAIN, STUDY_NAME, SUBJECT_ID, ExampleSDTMExporter
+from test_project.test_app.tests.example import (
+    DOMAIN,
+    STUDY_NAME,
+    SUBJECT_ID,
+    ExampleSDTMExporter,
+)
 
 
 class Variables(BaseVariables):
