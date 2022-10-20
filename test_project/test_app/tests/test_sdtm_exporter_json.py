@@ -1,5 +1,3 @@
-import csv
-
 from ddf import G
 import pytest
 

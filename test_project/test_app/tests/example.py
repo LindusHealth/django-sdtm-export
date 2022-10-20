@@ -1,5 +1,3 @@
-from enum import Enum
-
 from sdtm_export.sdtm_exporter import SDTMExporterBase
 from sdtm_export.variables import BaseVariables
 from test_project.test_app.models import Input, Participant, Study

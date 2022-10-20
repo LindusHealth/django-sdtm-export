@@ -1,5 +1,3 @@
-import csv
-
 from ddf import G
 import pytest
 
@@ -14,19 +12,7 @@ from test_project.test_app.models import (
     Study,
     Unit,
 )
-from test_project.test_app.tests.example import (
-    DOMAIN,
-    EXPORT_DISCLAIMER_TEXT,
-    STUDY_NAME,
-    SUBJECT_ID,
-    ExampleSDTMExporter,
-    Variables,
-)
-
-STUDY_NAME = "Test Name"
-DOMAIN = "EXAMPLE"
-SUBJECT_ID = "test-subject"
-EXPORT_DISCLAIMER_TEXT = "Test disclaimer"
+from test_project.test_app.tests.example import DOMAIN, STUDY_NAME, SUBJECT_ID, ExampleSDTMExporter
 
 
 class Variables(BaseVariables):
@@ -46,38 +32,6 @@ class AnnotatedVariables(BaseVariables):
     UNIT = ("UNIT", "Unit", "Char", "200")
     TEST_CONSTANT = ("CONST", "Test Constant", "Char", "200")
     SEQUENCE_NUMBER = ("SEQUENCE_NUMBER", "Sequence Number", "Char", "200")
-
-
-class ExampleSDTMExporter(SDTMExporterBase):
-    nodes = [
-        (Study, "participants", None),
-        (Participant, "inputs", "study"),
-        (Input, None, "participant"),
-    ]
-    constants = {Variables.TEST_CONSTANT.oid: "0"}
-    variables = Variables
-
-    csv_export_disclaimer_text = EXPORT_DISCLAIMER_TEXT
-
-    domain_variable = Variables.DOMAIN.oid
-    domain = "EXAMPLE"
-    label = "Example"
-
-    def visit_study(self, study):
-        return {Variables.STUDY_NAME.oid: study.name}
-
-    def visit_participant(self, participant):
-        return {Variables.SUBJECT_ID.oid: participant.subject_id}
-
-    def visit_input(self, input):
-        if hasattr(input, "unit") and input.unit:
-            unit = input.unit.unit
-        else:
-            unit = ""
-        return {
-            Variables.VALUE.oid: input.value,
-            Variables.UNIT.oid: unit,
-        }
 
 
 class AnnotatedExampleSDTMExporter(ExampleSDTMExporter):
