@@ -9,6 +9,7 @@ DOMAIN = "EXAMPLE"
 SUBJECT_ID = "test-subject"
 EXPORT_DISCLAIMER_TEXT = "Test disclaimer"
 
+
 class Variables(BaseVariables):
     STUDY_NAME = ("STUDY_NAME", "Study Name", "Char", "200")
     DOMAIN = ("DOMAIN", "Domain", "Char", "200")

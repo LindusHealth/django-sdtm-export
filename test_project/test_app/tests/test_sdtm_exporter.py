@@ -1,13 +1,27 @@
-
 import csv
-import pytest
+
 from ddf import G
+import pytest
+
 from sdtm_export.annotators import SequenceAnnotator
 from sdtm_export.sdtm_exporter import SDTMExporterBase
 from sdtm_export.variables import BaseVariables
-from test_project.test_app.models import Input, InputType, Participant, Question, Study, Unit
-from test_project.test_app.tests.example import DOMAIN, EXPORT_DISCLAIMER_TEXT, STUDY_NAME, SUBJECT_ID, ExampleSDTMExporter, Variables
-
+from test_project.test_app.models import (
+    Input,
+    InputType,
+    Participant,
+    Question,
+    Study,
+    Unit,
+)
+from test_project.test_app.tests.example import (
+    DOMAIN,
+    EXPORT_DISCLAIMER_TEXT,
+    STUDY_NAME,
+    SUBJECT_ID,
+    ExampleSDTMExporter,
+    Variables,
+)
 
 STUDY_NAME = "Test Name"
 DOMAIN = "EXAMPLE"

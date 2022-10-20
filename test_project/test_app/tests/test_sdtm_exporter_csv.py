@@ -1,10 +1,24 @@
-
 import csv
-import pytest
-from ddf import G
-from test_project.test_app.models import Input, InputType, Participant, Question, Study, Unit
-from test_project.test_app.tests.example import DOMAIN, EXPORT_DISCLAIMER_TEXT, STUDY_NAME, SUBJECT_ID, ExampleSDTMExporter, Variables
 
+from ddf import G
+import pytest
+
+from test_project.test_app.models import (
+    Input,
+    InputType,
+    Participant,
+    Question,
+    Study,
+    Unit,
+)
+from test_project.test_app.tests.example import (
+    DOMAIN,
+    EXPORT_DISCLAIMER_TEXT,
+    STUDY_NAME,
+    SUBJECT_ID,
+    ExampleSDTMExporter,
+    Variables,
+)
 
 EXPECTED_CSV_CONTENT = [
     [EXPORT_DISCLAIMER_TEXT],
@@ -86,8 +100,6 @@ class TestSDTMCSVExporter:
         with open(csv_file) as f:
             reader = list(csv.reader(f))
             assert len(reader) == len(EXPECTED_CSV_CONTENT)
-                ",".join(r) for r in EXPECTED_CSV_CONTENT
-            ))
             assert set(",".join(r) for r in reader) == set(
                 ",".join(r) for r in EXPECTED_CSV_CONTENT
             )

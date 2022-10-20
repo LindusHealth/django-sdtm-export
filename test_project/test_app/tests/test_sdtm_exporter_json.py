@@ -1,10 +1,21 @@
-
 import csv
-import pytest
-from ddf import G
-from test_project.test_app.models import Input, InputType, Participant, Question, Study, Unit
-from test_project.test_app.tests.example import STUDY_NAME, SUBJECT_ID, ExampleSDTMExporter
 
+from ddf import G
+import pytest
+
+from test_project.test_app.models import (
+    Input,
+    InputType,
+    Participant,
+    Question,
+    Study,
+    Unit,
+)
+from test_project.test_app.tests.example import (
+    STUDY_NAME,
+    SUBJECT_ID,
+    ExampleSDTMExporter,
+)
 
 
 @pytest.fixture()
