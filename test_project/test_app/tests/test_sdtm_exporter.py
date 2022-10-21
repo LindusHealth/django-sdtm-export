@@ -11,7 +11,7 @@ from test_project.test_app.models import (
     Study,
     Unit,
 )
-from test_project.test_app.tests.example import (
+from test_project.test_app.tests.example_sdtm_exporter import (
     DOMAIN,
     STUDY_NAME,
     SUBJECT_ID,
